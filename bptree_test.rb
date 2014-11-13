@@ -2,13 +2,6 @@ require 'minitest/autorun'
 require_relative 'bptree'
 
 class TestArray < Minitest::Test
-  def test_array_can_be_created_with_no_arguments
-    assert_instance_of Array, Array.new
-  end
-
-  def test_array_of_specific_length_can_be_created
-    assert_equal 10, Array.new(10).size
-  end
 
   def test_new_bptree
     b = Bptree.new
@@ -29,5 +22,25 @@ class TestArray < Minitest::Test
     b.insert 4,v
     assert b.is_leaf
     assert_equal v, b.get(4)
+    assert_equal nil, b.get(3)
   end
+
+  def test_adding_until_split
+    b = Bptree.new
+    v = 'placeholder'
+    1.upto(b.order-1) do |i|
+      b.insert i, "placeholder #{i}"
+      assert b.is_leaf
+    end
+    b.insert 'splitkey', 'splitvalue'
+    refute b.is_leaf
+    assert 0, b.values.count
+    assert_equal 2,b.children.count
+    assert_equal "placeholder 3", b.get(3)
+    assert_equal "splitvalue", b.get('splitkey')
+
+    assert 4, b.children[0].values.count
+    assert 3, b.children[1].values.count
+  end
+
 end
